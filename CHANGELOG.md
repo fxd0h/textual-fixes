@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## [6.6.0] - 2025-11-10
 
 ### Fixed
 
@@ -16,12 +16,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Fixed `TextArea` cursor display on wrapped lines https://github.com/Textualize/textual/pull/6196
 - Fixed `remove_children` not refreshing layout https://github.com/Textualize/textual/pull/6206
 - Fixed flicker with :hover pseudo class https://github.com/Textualize/textual/pull/6214
+- Fixed scrollbar not updating after textarea paste https://github.com/Textualize/textual/pull/6219
 
 ### Added
 
 - Added `grid_size` property to `GridLayout` https://github.com/Textualize/textual/pull/6210
 - Exposed `NoSelection` and `BLANK` via `textual.widgets.select` https://github.com/Textualize/textual/pull/6214
 - Added `Widget.FOCUS_ON_CLICK` classvar amd `Widget.focus_on_click` method https://github.com/Textualize/textual/pull/6216
+- Added support for the kitty keyboard protocol on Windows https://github.com/Textualize/textual/pull/6207
+- Added `Widget.mount_compose` https://github.com/Textualize/textual/pull/6216
 
 ### Changed
 
@@ -3193,6 +3196,7 @@ https://textual.textualize.io/blog/2022/11/08/version-040/#version-040
 - New handler system for messages that doesn't require inheritance
 - Improved traceback handling
 
+[6.6.0]: https://github.com/Textualize/textual/compare/v6.5.0...v6.6.0
 [6.5.0]: https://github.com/Textualize/textual/compare/v6.4.0...v6.5.0
 [6.4.0]: https://github.com/Textualize/textual/compare/v6.3.0...v6.4.0
 [6.3.0]: https://github.com/Textualize/textual/compare/v6.2.1...v6.3.0
