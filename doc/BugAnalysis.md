@@ -33,6 +33,18 @@ Este documento contiene el análisis de bugs simples y fáciles de implementar.
 - Test de regresión creado
 - CHANGELOG actualizado
 
+### ✅ **BUG #5917 - Input.valid_empty incorrectly ignored**
+**Estado: COMPLETADO Y COMMITEADO**
+
+**Branch**: `fix/5917-input-valid-empty-ignored`
+**Commit**: `2dd955b76`
+
+**Solución implementada**:
+- Modificado `validate()` para verificar `valid_empty` incluso cuando no hay validators
+- Si `valid_empty=False` y el valor está vacío, se marca como inválido
+- Test de regresión creado
+- CHANGELOG actualizado
+
 ---
 
 ## 🐛 Bugs Pendientes (Más Complejos)
@@ -93,7 +105,7 @@ Este documento contiene el análisis de bugs simples y fáciles de implementar.
 
 ## 📊 Resumen
 
-**Bugs completados**: 2 (#4852, #3449)
+**Bugs completados**: 3 (#4852, #3449, #5917)
 **Bugs pendientes simples**: 0
 **Bugs pendientes complejos**: 5+
 
