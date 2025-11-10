@@ -575,9 +575,13 @@ class Input(ScrollView):
             self.set_class(not valid, "-invalid")
             self.set_class(valid, "-valid")
 
-        # If no validators are supplied, and therefore no validation occurs, we return None.
+        # If no validators are supplied, we still need to check valid_empty.
         if not self.validators:
-            self._valid = True
+            # If valid_empty is False and the value is empty, it's invalid.
+            if not self.valid_empty and not value:
+                self._valid = False
+            else:
+                self._valid = True
             set_classes()
             return None
 
