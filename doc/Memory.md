@@ -181,6 +181,24 @@ Textual is a Python framework for building cross-platform user interfaces that r
 - Profesional con personalidad
 - **Inglés profesional** como idioma estándar, con pizcas de humor cuando sea apropiado
 
+### Análisis de PRs Aceptados
+- **Revisar merges y PRs aceptados**: Analizar regularmente los PRs que fueron aceptados en el proyecto Textual
+- **Entender patrones**: Identificar qué hace que los PRs sean aceptados:
+  - Estilo de código y documentación
+  - Estructura de commits
+  - Calidad de tests
+  - Descripción de PRs
+  - Interacción con reviewers
+- **Aplicar lineamientos**: Usar los mismos patrones y estándares en nuestros PRs
+- **Aprender continuamente**: Mantener un registro de mejores prácticas observadas
+
+### Estrategia de Aprendizaje
+1. Revisar PRs recientes aceptados en el repositorio Textualize/textual
+2. Analizar estructura de commits, mensajes, y descripciones
+3. Observar patrones en tests, documentación, y código
+4. Documentar hallazgos en `doc/PRPatterns.md`
+5. Aplicar estos patrones en nuestros PRs futuros
+
 ---
 
 ## Session History
