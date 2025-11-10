@@ -1,89 +1,61 @@
-# Análisis de Bugs - Textual Project
+# Análisis de Bugs Simples - Textual Project
 
-Este documento contiene el análisis de bugs del proyecto Textual para identificar cuáles son más fáciles de resolver.
+Este documento contiene el análisis de bugs simples y fáciles de implementar.
 
 ---
 
-## 🐛 Bugs Identificados y Análisis
+## ✅ Bugs Completados
 
 ### ✅ **BUG #4852 - TextArea scrollbar position not updated after paste** 
-**Prioridad: ALTA (Fácil de resolver)**
+**Estado: COMPLETADO Y COMMITEADO**
 
-**Descripción**: Cuando se pega texto en un `TextArea`, la posición del scrollbar vertical no se actualiza correctamente y debería estar al final del texto pegado.
+**Branch**: `fix/4852-textarea-scrollbar-paste`
+**Commit**: `01129c25f`
 
-**Ubicación del código**:
-- `src/textual/widgets/_text_area.py`
-  - Método `_on_paste()` (línea ~1847)
-  - Método `action_paste()` (línea ~2526)
-
-**Análisis**:
-- Ambos métodos insertan texto pero no llaman a `scroll_cursor_visible()` después de pegar
-- El método `move_cursor()` se llama pero sin el parámetro `center=False` que podría ayudar
-- Existe un método `scroll_cursor_visible()` que puede ser llamado después de pegar
-
-**Solución propuesta**:
-1. Llamar a `self.scroll_cursor_visible()` después de `move_cursor()` en ambos métodos
-2. O mejor aún, llamar a `scroll_cursor_visible()` dentro de `move_cursor()` cuando sea necesario
-
-**Complejidad**: ⭐⭐ (Baja)
-**Tiempo estimado**: 30-60 minutos
+**Solución implementada**:
+- Agregado `scroll_cursor_visible()` después de `move_cursor()` en `_on_paste()` y `action_paste()`
+- Tests de regresión creados
+- CHANGELOG actualizado
 
 ---
 
-### ⚠️ **BUG #4968 - `@on` decorator matches widget subclass unexpectedly**
-**Prioridad: MEDIA (Complejidad media)**
+### ✅ **BUG #3449 - DataTable auto-width columns don't shrink back down** 
+**Estado: COMPLETADO Y COMMITEADO**
 
-**Descripción**: El decorator `@on` está haciendo match con subclases de widgets cuando no debería. Si tienes `@on(MyButton.Pressed)` y un `Button` normal, también hace match.
+**Branch**: `fix/3449-datatable-auto-width-shrink`
+**Commit**: `551a71048`
 
-**Ubicación del código**:
-- `src/textual/_on.py` - Función `on()`
-- Probablemente en el sistema de mensajes donde se hace el matching
-
-**Análisis**:
-- El decorator `@on` usa selectores CSS para hacer matching
-- El problema parece estar en cómo se compara el tipo del widget en el mensaje
-- Necesita verificar que el tipo sea exactamente el especificado, no una subclase
-
-**Complejidad**: ⭐⭐⭐ (Media)
-**Tiempo estimado**: 2-4 horas
+**Solución implementada**:
+- Agregado flag `_rows_removed` para rastrear cuando se eliminan filas
+- Creado método `_recalculate_all_column_widths()` para recalcular anchos
+- Modificado `remove_row()` para establecer el flag
+- Modificado `_on_idle()` para recalcular cuando se eliminan filas
+- Test de regresión creado
+- CHANGELOG actualizado
 
 ---
 
-### ⚠️ **BUG #5103 - TextArea scrollbar and wrapping interaction on initial render**
+## 🐛 Bugs Pendientes (Más Complejos)
+
+### ⚠️ **BUG #4639 - priority binding order is not respected in the Footer**
 **Prioridad: MEDIA (Complejidad media)**
 
-**Descripción**: Cuando un `TextArea` tiene wrapping habilitado y contenido que requiere scrollbar, el wrap inicial no tiene en cuenta el scrollbar, causando que el contenido se envuelva más ancho de lo que debería.
+**Descripción**: El orden de los bindings con prioridad no se respeta en el Footer widget.
 
-**Ubicación del código**:
-- `src/textual/widgets/_text_area.py`
-- Probablemente en el método de render inicial o en el cálculo del ancho disponible
-
-**Análisis**:
-- El problema está en el cálculo del ancho disponible para el wrapping
-- El scrollbar debería restarse del ancho disponible antes de hacer el wrap inicial
-- Necesita revisar `_watch_show_vertical_scrollbar()` y el cálculo de ancho
-
+**Estado**: Hay un fix sugerido por TomJGooding pero podría afectar otro issue (#4382)
 **Complejidad**: ⭐⭐⭐ (Media)
 **Tiempo estimado**: 2-3 horas
 
 ---
 
-### ⚠️ **BUG #3510 - [typing] Inconsistent typing in the work decorator**
-**Prioridad: BAJA (Complejidad alta)**
+### ⚠️ **BUG #5103 - TextArea scrollbar and wrapping interaction on initial render**
+**Prioridad: MEDIA (Problema de timing)**
 
-**Descripción**: Inconsistencias en los tipos del decorator `@work`. Hay un uso inconsistente de `Decorator` versus `Decorator[..., ReturnType]`.
+**Descripción**: El wrap inicial no tiene en cuenta el scrollbar, causando que el contenido se envuelva más ancho de lo que debería.
 
-**Ubicación del código**:
-- `src/textual/_work_decorator.py`
-
-**Análisis**:
-- El problema está en la definición de tipos del decorator
-- Hay múltiples overloads pero puede haber inconsistencias
-- Puede requerir cambios complejos en los tipos genéricos
-- Mencionan que ya se intentó antes (PR #3862) y hubo problemas con mypy
-
-**Complejidad**: ⭐⭐⭐⭐ (Alta)
-**Tiempo estimado**: 4-8 horas (puede ser más si hay problemas con mypy)
+**Estado**: Problema chicken-and-egg (no se puede saber el ancho hasta hacer wrap, pero no se puede hacer wrap sin saber el ancho)
+**Complejidad**: ⭐⭐⭐ (Media-Alta)
+**Tiempo estimado**: 2-4 horas
 
 ---
 
@@ -92,40 +64,41 @@ Este documento contiene el análisis de bugs del proyecto Textual para identific
 
 **Descripción**: KeyError cuando se limpia y renderiza contenido repetidamente en DataTable.
 
-**Análisis**:
-- Necesita más información para reproducir
-- Puede ser un problema de sincronización o de limpieza de datos
-- Requiere crear un caso de prueba para reproducir el error
-
+**Estado**: No hay ejemplo mínimo para reproducir
 **Complejidad**: ⭐⭐⭐ (Media-Alta)
 **Tiempo estimado**: Desconocido hasta reproducir
 
 ---
 
-## 🎯 Recomendación: Empezar con BUG #4852
+### ⚠️ **BUG #5155 - Transparent component class background blends with wrong colour**
+**Prioridad: MEDIA (Complejidad arquitectónica)**
 
-**Razones**:
-1. ✅ **Más simple**: Solo requiere agregar una llamada a método existente
-2. ✅ **Bien definido**: El problema está claro y la solución es obvia
-3. ✅ **Bajo riesgo**: No afecta otras funcionalidades
-4. ✅ **Fácil de testear**: Se puede crear un test simple
+**Descripción**: El blend se hace contra el parent incorrecto cuando se usan component classes.
 
-**Plan de acción**:
-1. Revisar el código de `_on_paste()` y `action_paste()`
-2. Agregar llamada a `scroll_cursor_visible()` después de pegar
-3. Crear test de regresión
-4. Verificar que funciona correctamente
-5. Actualizar CHANGELOG.md
+**Complejidad**: ⭐⭐⭐⭐ (Alta)
+**Tiempo estimado**: 4-6 horas
 
 ---
 
-## 📋 Otros Bugs para Considerar Después
+### ⚠️ **BUG #4968 - `@on` decorator matches widget subclass unexpectedly**
+**Prioridad: MEDIA (Complejidad arquitectónica)**
 
-- **#5155** - Transparent component class background blends with wrong colour
-- **#4955** - Unable to switch tabs in TabbedContent using a key binding
-- **#4639** - priority binding order is not respected in the Footer
-- **#3449** - DataTable auto-width columns don't shrink back down
+**Descripción**: `@on(MyButton.Pressed)` hace match con `Button` normal.
+
+**Estado**: Requiere cambios en cómo se almacena la información del decorator
+**Complejidad**: ⭐⭐⭐⭐ (Alta)
+**Tiempo estimado**: 4-8 horas
 
 ---
 
-*Última actualización: Análisis inicial*
+## 📊 Resumen
+
+**Bugs completados**: 2 (#4852, #3449)
+**Bugs pendientes simples**: 0
+**Bugs pendientes complejos**: 5+
+
+**Recomendación**: Los bugs restantes requieren más investigación o cambios arquitectónicos. Es mejor preparar los PRs para los bugs completados.
+
+---
+
+*Última actualización: Después de investigación exhaustiva*
