@@ -1851,6 +1851,7 @@ TextArea {
             return
         if result := self._replace_via_keyboard(event.text, *self.selection):
             self.move_cursor(result.end_location)
+            self.scroll_cursor_visible()
             self.focus()
 
     def cell_width_to_column_index(self, cell_width: int, row_index: int) -> int:
@@ -2531,6 +2532,7 @@ TextArea {
         clipboard = self.app.clipboard
         if result := self._replace_via_keyboard(clipboard, *self.selection):
             self.move_cursor(result.end_location)
+            self.scroll_cursor_visible()
 
     def action_delete_to_start_of_line(self) -> None:
         """Deletes from the cursor location to the start of the line."""
