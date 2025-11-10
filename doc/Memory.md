@@ -201,6 +201,200 @@ Textual is a Python framework for building cross-platform user interfaces that r
 
 ---
 
+## Contribución y PR Guidelines (from CONTRIBUTING.md)
+
+### Checklist Antes de Abrir un PR
+- [ ] Update the `CHANGELOG.md`
+- [ ] Format your code with black (`make format`)
+- [ ] All your code has docstrings in the style of the rest of the codebase
+- [ ] Your code passes all tests (`make test`)
+
+### Guidelines Importantes
+- **Read issue instructions carefully**: Feel free to ask for clarification if any details are missing
+- **Add docstrings**: All code (functions, methods, classes) must have docstrings. The codebase has enough examples to copy from
+- **Write tests**: 
+  - If fixing a bug: add regression tests that link to the original issue
+  - If implementing a visual element: add snapshot tests
+- **Documentation changes**: For subjective changes, open an issue first. For technical issues (bugs, broken links), direct PR is fine
+
+### Después de Abrir un PR
+- Code will be reviewed by Textual maintainers
+- They might ask for clarifications, more tests, more documentation, or code changes
+- Don't be discouraged by review feedback - even maintainers make changes after review
+- The goal is to ensure the best experience for everyone
+
+---
+
+## Testing Guidelines
+
+### Test Framework
+- Use **pytest** with **pytest-asyncio** plugin
+- Textual uses `asyncio_mode = auto` in pytest config (no need for `@pytest.mark.asyncio`)
+
+### Testing Apps
+- Use `app.run_test()` instead of `app.run()` for headless testing
+- Returns a `Pilot` object for simulating user interactions
+- Tests must be `async` functions
+
+### Snapshot Testing
+- Used for visual elements/widgets
+- Use `snap_compare` fixture: `assert snap_compare("path/to/app.py")`
+- Can simulate key presses: `snap_compare("app.py", press=["key1", "key2"])`
+- When snapshot test fails:
+  - Visual report created for comparison
+  - If new output is correct: run `pytest --snapshot-update` to update
+  - If old snapshot is correct: your change introduced a bug, fix it
+- Never modify snapshot files manually
+- Run: `pytest -vv tests/snapshot_tests/test_snapshots.py`
+- Update: `make test-snapshot-update`
+
+### Pilot Methods
+- `pilot.press("key1", "key2")` - Simulate key presses
+- `pilot.click(selector)` - Simulate mouse clicks
+- `pilot.click(offset=(x, y))` - Click at coordinates
+- `pilot.pause()` - Wait for pending messages to be processed
+- `pilot.pause(delay=0.1)` - Add delay before waiting
+
+### Test Size
+- Default test size: (80, 24)
+- Can specify: `app.run_test(size=(100, 50))`
+
+---
+
+## CHANGELOG Format
+
+### Structure
+- Based on [Keep a Changelog](http://keepachangelog.com/)
+- Follows [Semantic Versioning](http://semver.org/)
+- Sections: Unreleased, [Version] - YYYY-MM-DD
+- Subsections: Fixed, Added, Changed, Removed, Deprecated, Security
+
+### Entry Format
+```
+- Brief description https://github.com/Textualize/textual/pull/XXXX
+```
+or
+```
+- Brief description https://github.com/Textualize/textual/issues/XXXX
+```
+
+### Examples
+- `- Fixed `TextArea` scrollbar position not updated after paste https://github.com/Textualize/textual/issues/4852`
+- `- Added `grid_size` property to `GridLayout` https://github.com/Textualize/textual/pull/6210`
+- `- Change highlight style of Select to only highlight the border, not the label https://github.com/Textualize/textual/pull/6214`
+
+---
+
+## Commit Message Patterns
+
+### Observed Patterns
+- Short, descriptive titles
+- Can use conventional commit format: `fix(component): description`
+- Examples:
+  - `fix(text area): fix cursor display on wrapped line`
+  - `expose grid-size`
+  - `Focus on click and mount_compose`
+  - `changelog` (for CHANGELOG-only commits)
+  - `snapshot test for focus on click`
+
+### Best Practices
+- One logical change per commit
+- Clear, descriptive messages
+- Reference issue numbers when applicable
+- Separate commits for different concerns (code, tests, changelog, docs)
+
+---
+
+## Code Style and Documentation
+
+### Docstrings
+- **Required**: All functions, methods, classes must have docstrings
+- **Style**: Follow the style of the rest of the codebase (plenty of examples)
+- **Language**: English professional
+
+### Code Formatting
+- Use **black** for formatting: `make format`
+- Check formatting: `make format-check`
+- Pre-commit hooks will auto-format
+
+### Type Checking
+- Use **mypy**: `make typecheck`
+- Type hints are important
+
+---
+
+## Snapshot Testing Details
+
+### How It Works
+1. First run: Takes screenshot, saves to disk
+2. Subsequent runs: Takes new screenshot, compares with saved one
+3. If different: You decide if change is expected or a bug
+
+### Writing Snapshot Tests
+```python
+def test_my_widget(snap_compare):
+    assert snap_compare("path/to/app.py")
+```
+
+### Updating Snapshots
+- Run: `make test-snapshot-update`
+- Updates all snapshots for tests that ran
+- To update single test: Run only that test with `--snapshot-update`
+
+### Snapshot Files
+- Location: `tests/snapshot_tests/__snapshots__/`
+- Format: SVG files
+- **Never modify manually** - always use `make test-snapshot-update`
+
+---
+
+## Makefile Commands Reference
+
+### Setup & Environment
+- `make setup` - Install all dependencies
+- `make update` - Update dependencies
+
+### Code Quality
+- `make format` - Format code with black
+- `make format-check` - Check code formatting
+- `make typecheck` - Run mypy type checking
+
+### Testing
+- `make test` - Run all tests
+- `make testv` - Run tests with verbose output
+- `make test-coverage` - Run tests with coverage report
+- `make test-snapshot-update` - Update snapshot tests
+- `make coverage` - Generate HTML coverage report
+
+### Documentation
+- `make docs-serve-offline` - Serve docs locally (reloads on changes)
+- `make docs-build` - Build documentation
+- `make docs-build-offline` - Build offline documentation
+- `make docs-deploy` - Deploy documentation
+
+### Development
+- `make demo` - Run Textual demo
+- `make repl` - Start Python REPL with textual imported
+- `make clean` - Clean build artifacts
+
+---
+
+## Community and Support
+
+### Discord
+- Join: https://discord.gg/Enf6Z3qhVr
+- Get help, discuss, connect with maintainers
+
+### Reporting Bugs
+- Template: https://github.com/textualize/textual/issues/new?title=%5BBUG%5D%20short%20bug%20description&template=bug_report.md
+
+### Code of Conduct
+- Contributor Covenant Code of Conduct
+- Be respectful, empathetic, professional
+- Report issues to: will@textualize.io
+
+---
+
 ## Session History
 
 ### 2025-01-XX - Initial Setup (COMPLETED ✓)
