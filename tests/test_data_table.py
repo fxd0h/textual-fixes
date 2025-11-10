@@ -412,6 +412,78 @@ async def test_clear():
         assert len(table.columns) == 0
 
 
+async def test_auto_width_columns_shrink_after_row_removal():
+    """Regression test for issue #3449: auto-width columns should shrink back down after removing rows.
+
+    When rows are removed from a DataTable, column widths with auto_width=True should
+    be recalculated to reflect the new maximum content width.
+    """
+    app = DataTableApp()
+    async with app.run_test() as pilot:
+        table = app.query_one(DataTable)
+
+        # Add columns (without width parameter, so they get auto_width=True by default)
+        lane_key, swimmer_key, country_key, time_key = table.add_columns(
+            "lane", "swimmer", "country", "time"
+        )
+
+        # Add rows with varying content widths
+        # The last row has the widest content in the "swimmer" column
+        rows = [
+            (4, "Joseph Schooling", "Singapore", 50.39),
+            (2, "Michael Phelps", "United States", 51.14),
+            (5, "Chad le Clos", "South Africa", 51.14),
+            (6, "László Cseh", "Hungary", 51.14),
+            (3, "Li Zhuhao", "China", 51.26),
+            (8, "Mehdy Metella", "France", 51.58),
+            (7, "Tom Shields", "United States", 51.73),
+            (
+                1,
+                "Aleksandr Sadovnikov =============",
+                "Russia",
+                51.84,
+            ),  # Widest content
+        ]
+
+        row_keys = []
+        for row in rows:
+            row_key = table.add_row(*row)
+            row_keys.append(row_key)
+
+        # Wait for initial column width calculation
+        await pilot.pause()
+
+        # Get the initial column width for the "swimmer" column (should be wide due to last row)
+        initial_swimmer_width = table.columns[swimmer_key].content_width
+        assert initial_swimmer_width > 0, "Column width should be calculated"
+
+        # Remove the row with the widest content
+        table.remove_row(
+            row_keys[-1]
+        )  # Remove "Aleksandr Sadovnikov =============" row
+
+        # Wait for column width recalculation
+        await pilot.pause()
+
+        # The column width should have shrunk since the widest content was removed
+        final_swimmer_width = table.columns[swimmer_key].content_width
+        assert final_swimmer_width < initial_swimmer_width, (
+            f"Column width should shrink after removing widest row. "
+            f"Initial: {initial_swimmer_width}, Final: {final_swimmer_width}"
+        )
+
+        # Verify the width is now based on the remaining widest content
+        # The widest remaining should be "Mehdy Metella" or similar
+        remaining_swimmer_values = [
+            row[1] for row in rows[:-1]
+        ]  # All rows except the removed one
+        expected_max_width = max(len(str(value)) for value in remaining_swimmer_values)
+        # Account for label width and some padding
+        assert (
+            final_swimmer_width >= expected_max_width
+        ), f"Column width should accommodate remaining content. Expected at least {expected_max_width}, got {final_swimmer_width}"
+
+
 async def test_column_labels() -> None:
     app = DataTableApp()
     async with app.run_test():
