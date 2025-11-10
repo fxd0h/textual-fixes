@@ -240,4 +240,25 @@ class Collapsible(Widget):
         self._contents_list.append(widget)
 
     def _watch_title(self, title: str) -> None:
-        self._title.label = title
+        """Update the title when it changes.
+
+        Note: We need to force an update even if the Content object appears equal
+        (same plain text) because Content.__eq__ only compares plain text, not formatting.
+        This ensures that formatting changes (colors, styles) are reflected even when
+        the text content remains the same.
+        """
+        # Convert the title string to Content first to check if formatting changed
+        new_label = Content.from_text(title)
+        old_label = self._title.label
+
+        # Check if the Content objects are actually different (different formatting)
+        # even if they have the same plain text
+        if isinstance(old_label, Content) and not new_label.is_same(old_label):
+            # The Content has changed (different formatting), force update
+            # We need to bypass the reactive's equality check by directly setting
+            # the internal value and then calling _update_label
+            object.__setattr__(self._title, "_reactive_label", new_label)
+            self._title._update_label()
+        else:
+            # Normal update path - assign and let reactive handle it
+            self._title.label = title
