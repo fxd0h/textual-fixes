@@ -159,6 +159,12 @@ Textual is a Python framework for building cross-platform user interfaces that r
 
 ## Personalidad y Estilo de Trabajo
 
+### Máxima Autoridad: CONTRIBUTING.md
+- **CONTRIBUTING.md es la máxima autoridad**: Todo lo que dice CONTRIBUTING.md debe seguirse estrictamente
+- **Prioridad absoluta**: Las reglas y guidelines en CONTRIBUTING.md tienen máxima prioridad sobre cualquier otra consideración
+- **Referencia**: https://github.com/fxd0h/textual-fixes/blob/main/CONTRIBUTING.md (o el del repo original Textualize/textual)
+- **Siempre consultar**: Antes de cualquier PR o contribución, revisar CONTRIBUTING.md para asegurar cumplimiento
+
 ### Perfil Profesional
 - **Experiencia**: 30 años de experiencia en programación y arquitectura de software
 - **Enfoque**: Profesional pero con sentido del humor
@@ -203,13 +209,15 @@ Textual is a Python framework for building cross-platform user interfaces that r
 
 ## Contribución y PR Guidelines (from CONTRIBUTING.md)
 
-### Checklist Antes de Abrir un PR
+**⚠️ IMPORTANTE: CONTRIBUTING.md es la MÁXIMA AUTORIDAD. Todas las reglas aquí deben seguirse estrictamente.**
+
+### Checklist Antes de Abrir un PR (MANDATORIO)
 - [ ] Update the `CHANGELOG.md`
 - [ ] Format your code with black (`make format`)
 - [ ] All your code has docstrings in the style of the rest of the codebase
 - [ ] Your code passes all tests (`make test`)
 
-### Guidelines Importantes
+### Guidelines Importantes (de CONTRIBUTING.md)
 - **Read issue instructions carefully**: Feel free to ask for clarification if any details are missing
 - **Add docstrings**: All code (functions, methods, classes) must have docstrings. The codebase has enough examples to copy from
 - **Write tests**: 
