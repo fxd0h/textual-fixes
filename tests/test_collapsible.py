@@ -245,3 +245,44 @@ async def test_collapsible_title_reactive_change():
         assert get_title(collapsible).label == "Old title"
         collapsible.title = "New title"
         assert get_title(collapsible).label == "New title"
+
+
+async def test_collapsible_title_formatting_update():
+    """Regression test for issue #5786: title formatting should update even when text is the same.
+
+    When only the formatting (color, style) of the title changes but the text
+    remains the same, the Collapsible title should still update.
+    """
+
+    class CollapsibleApp(App[None]):
+        def compose(self) -> ComposeResult:
+            yield Collapsible(title="[#ff0000]title[/]", collapsed=False)
+
+    async with CollapsibleApp().run_test() as pilot:
+        collapsible = pilot.app.query_one(Collapsible)
+        title_widget = get_title(collapsible)
+
+        # Get initial label content
+        from textual.content import Content
+
+        initial_label = title_widget.label
+        assert isinstance(initial_label, Content)
+        initial_spans = initial_label.spans
+
+        # Change title formatting (same text, different color)
+        collapsible.title = "[#00ff00]title[/]"
+        await pilot.pause()
+
+        # Verify the label was updated with new formatting
+        updated_label = title_widget.label
+        assert isinstance(updated_label, Content)
+        updated_spans = updated_label.spans
+
+        # Text should be the same
+        assert initial_label.plain == updated_label.plain == "title"
+
+        # But the spans should be different (different colors)
+        assert initial_spans != updated_spans, (
+            "Title formatting should have changed (different spans), "
+            "but Content objects appear identical. This indicates bug #5786."
+        )
