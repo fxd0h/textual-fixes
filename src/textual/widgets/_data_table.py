@@ -781,6 +781,8 @@ class DataTable(ScrollView, Generic[CellType], can_focus=True):
         """Tracking newly added rows to be used in calculation of dimensions on idle."""
         self._updated_cells: set[CellKey] = set()
         """Track which cells were updated, so that we can refresh them once on idle."""
+        self._rows_removed: bool = False
+        """Track if rows were removed, so that column widths can be recalculated on idle."""
 
         self._show_hover_cursor = False
         """Used to hide the mouse hover cursor when the user uses the keyboard."""
@@ -1404,6 +1406,89 @@ class DataTable(ScrollView, Generic[CellType], can_focus=True):
 
         self._require_update_dimensions = True
 
+    def _recalculate_all_column_widths(self) -> None:
+        """Recalculate column widths for all columns based on all remaining rows.
+
+        This is used when rows are removed to ensure that auto-width columns
+        shrink back down if the widest content is no longer present.
+        """
+        # Only recalculate if there are any columns with auto_width=True
+        has_auto_width_columns = any(
+            column.auto_width for column in self.columns.values()
+        )
+        if not has_auto_width_columns:
+            return
+
+        console = self.app.console
+
+        # Recalculate label column width
+        if self.show_row_labels:
+            label_content_widths = []
+            for row_key in self.rows:
+                row = self.rows.get(row_key)
+                if row is None or row.label is None:
+                    continue
+                row_index = self._row_locations.get(row_key)
+                if row_index is None:
+                    continue
+                row_label, _ = self._get_row_renderables(row_index)
+                if row_label:
+                    label_content_widths.append(measure(console, row_label, 1))
+            if label_content_widths:
+                self._label_column.content_width = max(label_content_widths)
+            else:
+                self._label_column.content_width = 0
+
+        # Recalculate all data column widths
+        for column_key, column in self.columns.items():
+            # Only recalculate columns with auto_width=True
+            if not column.auto_width:
+                continue
+
+            label_width = measure(console, column.label, 1)
+            cells_in_column = list(self.get_column(column_key))
+            if not cells_in_column:
+                column.content_width = label_width
+                continue
+
+            # Get all row keys that have this column
+            row_keys_with_column = [
+                row_key
+                for row_key in self.rows
+                if column_key in self._data.get(row_key, {})
+            ]
+
+            if not row_keys_with_column:
+                column.content_width = label_width
+                continue
+
+            # Calculate width for each cell in the column
+            cell_widths = []
+            for row_key in row_keys_with_column:
+                row = self.rows.get(row_key)
+                if row is None:
+                    continue
+                cell_value = self._data[row_key][column_key]
+                render_height = row.height
+                cell_width = measure(
+                    console,
+                    default_cell_formatter(
+                        cell_value,
+                        wrap=row.height != 1,
+                        height=render_height,
+                    ),
+                    1,
+                )
+                cell_widths.append(cell_width)
+
+            # Set column width to the maximum of all cell widths and label width
+            if cell_widths:
+                column.content_width = max([*cell_widths, label_width])
+            else:
+                column.content_width = label_width
+
+        self._require_update_dimensions = True
+
     def _update_dimensions(self, new_rows: Iterable[RowKey]) -> None:
         """Called to recalculate the virtual (scrollable) size.
 
@@ -1802,6 +1887,8 @@ class DataTable(ScrollView, Generic[CellType], can_focus=True):
             raise RowDoesNotExist(f"Row key {row_key!r} is not valid.")
 
         self._require_update_dimensions = True
+        # Mark that rows were removed so column widths can be recalculated
+        self._rows_removed = True
         self.check_idle()
 
         index_to_delete = self._row_locations.get(row_key)
@@ -1873,6 +1960,12 @@ class DataTable(ScrollView, Generic[CellType], can_focus=True):
         whole DataTable and re-computing column widths after some cells
         have been updated. This is more efficient in the case of high
         frequency updates, ensuring we only do expensive computations once."""
+        if self._rows_removed:
+            # Rows were removed, so we need to recalculate all column widths
+            # to ensure auto-width columns shrink back down if needed.
+            self._rows_removed = False
+            self._recalculate_all_column_widths()
+
         if self._updated_cells:
             # Cell contents have already been updated at this point.
             # Now we only need to worry about measuring column widths.
