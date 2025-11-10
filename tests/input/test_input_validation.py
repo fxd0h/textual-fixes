@@ -222,3 +222,30 @@ async def test_valid_empty():
 
         assert input.has_class("-valid")
         assert not input.has_class("-invalid")
+
+
+async def test_valid_empty_ignored_when_no_validators():
+    """Regression test for issue #5917: valid_empty incorrectly ignored when no validators.
+
+    When an Input is created with valid_empty=False and an initial value,
+    it should become invalid when the content is deleted, even if there are no validators.
+    """
+    app = InputApp(None)
+    async with app.run_test() as pilot:
+        # Create Input with valid_empty=False and initial value, but no validators
+        input = Input(valid_empty=False, id="test-input", value="x")
+        app.mount(input)
+        await pilot.pause()
+
+        # Initially should be valid (has content "x")
+        assert input.has_class("-valid")
+        assert not input.has_class("-invalid")
+
+        # Delete the content
+        input.focus()
+        await pilot.press("backspace")
+        await pilot.pause()
+
+        # Now should be invalid (empty and valid_empty=False)
+        assert input.has_class("-invalid")
+        assert not input.has_class("-valid")
